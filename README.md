@@ -22,52 +22,133 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# Nest-JS-Authentication
+
+A project demonstrating how to use Nest.js with TypeScript for authentication, including JWT implementation.
+
+## Features
+
+- Authentication with JWT (JSON Web Token).
+- Secure routes with guard.
+- User registration and login.
 
 ## Installation
 
-```bash
-$ npm install
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/raihanwebmaster/Nest-JS-Authentication.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd Nest-JS-Authentication
+    ```
+3. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+## Usage
+
+1. Start the development server:
+    ```bash
+    npm run start:dev
+    ```
+2. The server will start on `http://localhost:3000`.
+
+## Project Structure
+
+- `src/`: Contains the source code for the Nest.js application.
+- `test/`: Contains the test code for the application.
+
+## Authentication with JWT
+
+This project uses JWT for authentication. Below are some examples and configurations to help you get started.
+
+### Configuration
+
+The JWT configuration is defined in `src/auth/auth.module.ts`:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { UsersModule } from '../users/users.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+
+@Module({
+  imports: [
+    UsersModule,
+    PassportModule,
+    JwtModule.register({
+      secret: 'your_jwt_secret_key',
+      signOptions: { expiresIn: '60s' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+})
+export class AuthModule {}
 ```
 
-## Running the app
+### Usage in Controllers
 
-```bash
-# development
-$ npm run start
+To protect routes using JWT, you can use the `@UseGuards` decorator along with the `JwtAuthGuard`:
 
-# watch mode
-$ npm run start:dev
+```typescript
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
-# production mode
-$ npm run start:prod
+@Controller('profile')
+export class ProfileController {
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  getProfile(@Request() req) {
+    return req.user;
+  }
+}
 ```
 
-## Test
+### Generating JWT Tokens
 
-```bash
-# unit tests
-$ npm run test
+JWT tokens are generated during the login process. Here is an example of the login function in the `auth.service.ts`:
 
-# e2e tests
-$ npm run test:e2e
+```typescript
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 
-# test coverage
-$ npm run test:cov
+@Injectable()
+export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService
+  ) {}
+
+  async validateUser(username: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOne(username);
+    if (user && user.password === pass) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async login(user: any) {
+    const payload = { username: user.username, sub: user.userId };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+}
 ```
 
-## Support
+## Contributing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Contributions are welcome! Please open an issue or submit a pull request.
 
-## Stay in touch
+## Contact
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+For any inquiries, please reach out to the repository owner.
