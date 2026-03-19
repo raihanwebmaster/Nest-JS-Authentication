@@ -55,6 +55,72 @@ A project demonstrating how to use Nest.js with TypeScript for authentication, i
     npm run start:dev
     ```
 2. The server will start on `http://localhost:3000`.
+### 3. Generate JWT Token
+
+- **Request Type:** `POST`  
+- **URL:**  
+  ```
+  http://localhost:3000/login
+  ```
+
+- **Body (Postman):**
+  - Select **raw**
+  - Choose **JSON** from dropdown
+  - Paste the following (as defined in `users.service.ts`):
+
+```json
+{
+  "username": "marius",
+  "password": "sosecure"
+}
+```
+
+---
+
+### 4. Response
+
+You will receive an `access_token` (JWT), for example:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+### 5. Set Authorization Header
+
+- Go to **Authorization** tab in Postman  
+- Select **Bearer Token**  
+- Paste the copied `access_token`  
+
+> ⚠️ Do not click "Send" again on the login request
+
+---
+
+### 6. Get User Details (Protected API)
+
+- **Request Type:** `GET`  
+- **URL:**  
+  ```
+  http://localhost:3000/protected
+  ```
+
+---
+
+### 7. Response
+
+```json
+{
+  "id": 1,
+  "name": "Marius"
+}
+```
+
+---
+
+### ℹ️ Note
+
+Since the JWT token is generated for user **"marius"**, the protected API will return only that user's details.
 
 ## Project Structure
 
